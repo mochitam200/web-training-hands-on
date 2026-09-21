@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品一覧</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+</head>
+<body>
+    <h1>商品一覧</h1>
+    <% products.forEach(product => { %>
+
+    <div class="product">         
+            <div class="product-content">
+                <h2><a href="/product/<%= product.id %>"><%= product.name %></a></h2>
+                <img src="<%= product.image_url %>" alt="<%= product.name %>">
+                <p>価格：￥<%= product.price %></p>
+                <form action="/add-to-cart" method="POST">
+                    <input type="hidden" name="product_id" value="<%= product.id %>">
+                    <input type="number" name="quantity" value="1" min="1">
+                    <button type="submit">カートに入れる</button>
+                </form>
+            </div>       
+    </div>   
+    <% }); %>
+    <a href="/cart" class="button">カートに移動</a>
+
+</body>
+</html>

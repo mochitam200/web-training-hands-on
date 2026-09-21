@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カート</title>
+    <link rel="stylesheet" href="stylesheets/styles.css"></head>
+</head>
+<body>
+    <h1>カート</h1>
+
+    <div class="cart-item">
+        <% cartItems.forEach(item => { %>
+        <h2><%= item.name %></h2>
+        <p>価格：￥<%= item.price %></p>
+        <p>数量：<%= item.quantity %></p>
+        <% }); %>
+    </div>
+     
+    <hr>
+
+    <h2>合計金額：￥<%= totalPrice %></h2>
+    <button>購入手続きへ進む</button>
+    <a href="/productList" class="button">商品一覧に戻る</a>
+</body>
+</html>

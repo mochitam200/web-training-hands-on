@@ -1,0 +1,41 @@
+# 実行ファイル
+*.exe
+*.out
+*.app
+
+# オブジェクトファイル・ライブラリ
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+
+# デバッグ情報
+*.pdb
+*.ilk
+*.exp
+
+# ビルドディレクトリ
+build/
+Build/
+bin/
+obj/
+
+# CMake生成ファイル
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# 一時ファイル・ログ
+*.log
+*.tmp
+*.swp
+
+x64/
+*.vcxproj.user
+.vs/
+node_modules/

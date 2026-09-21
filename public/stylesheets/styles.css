@@ -1,0 +1,61 @@
+     body{
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .product {
+            border: 1px solid #ccc; /*solid → 実線*/
+            border-radius: 8px; /*四隅を丸く*/
+            display: inline-block; /*要素を横に並べる*/
+            width: calc(33% - 64px); /*横幅を親要素の幅の33%から64pxを引いた幅*/
+            padding: 16px;
+            margin: 16px;
+            box-sizing: border-box;
+            /* height: 300px; ← 高さを固定せず、min-heightに変更するか削除します */
+            min-height: 350px; 
+            vertical-align: top; /* 横並び時の上揃え */
+        }
+        .product-content {
+            display: flex; /*中にある要素を並べたり位置を調整する*/
+            flex-direction: column; /*中身を縦方向に並べる*/
+            align-items: center; /*中にある要素を横方向の中央に配置*/
+            text-align: center; /*文字を中央揃え*/
+            height: 100%;
+        }
+        .product img {
+            max-width: 100%;
+            max-height: 150px; /* 画像の最大高さを制限して収める */
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            flex-shrink: 1; /* 枠が狭い場合に画像を自動縮小 */
+        }
+        .button {
+            display: inline-block;
+            background-color: blue;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+        }
+        .button:hover {
+            background-color: aqua;
+        }
+         .product-detail {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            text-align: center;
+            padding: 16px;
+        }
+        /* 追加 */
+         .product-detail img {
+             max-width: 300px; /* 画像の最大横幅を指定（お好みのサイズに変更可能） */
+             width: 100%;       /* 親要素の幅に合わせて縮小 */
+             height: auto;      /* 縦横比を維持 */
+             object-fit: contain;
+        }
+        .cart-item {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 16px 0;
+        }
