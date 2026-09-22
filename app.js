@@ -39,13 +39,34 @@ app.post('/login', (req, res) => {
      if(err){
       res.status(500).send('DB select error');
       return;
-    }
-    
+    }    
     if(!row || row.password !== password){
       res.render('login.ejs', { errorMessage: 'ユーザーIDかパスワードが正しくありません'});
       return;
     }
     res.redirect('/productList');
+  });
+});
+
+//管理者用ログイン画面への移動
+app.get('/admin', (req, res) => {
+  res.render('admin', { errorMessage:''});
+});
+
+//管理者用ログイン機能
+app.post('/admin', (req, res) => {
+  const { username, password } = req.body;
+  db.get('SELECT * FROM users WHERE username = ? AND role = ?',[username, 'admin'],(err, row) => {
+     if(err){
+      res.status(500).send('DB select error');
+      return;
+    }
+
+    if(!row || row.password !== password){
+      res.render('admin', { errorMessage: 'ユーザーIDかパスワードが正しくありません'});
+      return;
+    }
+    res.redirect('/productAdmin');
   });
 });
 
