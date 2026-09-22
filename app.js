@@ -27,6 +27,51 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+//ログイン画面への移動
+app.get('/login', (req, res) => {
+  res.render('login', { errorMessage:''});
+});
+
+//ログイン機能
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+  db.get('SELECT * FROM users WHERE username = ?',[username],(err, row) => {
+     if(err){
+      res.status(500).send('DB select error');
+      return;
+    }
+    
+    if(!row || row.password !== password){
+      res.render('login.ejs', { errorMessage: 'ユーザーIDかパスワードが正しくありません'});
+      return;
+    }
+    res.redirect('/productList');
+  });
+});
+
+//ユーザー登録画面への移動
+app.get('/register', (req, res) => {
+  res.render('register', {errorMessage:''});
+});
+
+//ユーザー登録機能
+app.post('/register', (req, res) => {
+  const { username, password } = req.body;
+  //パスワードが条件を満たしているかチェックする正規表現(12文字以上で、英小文字・英大文字・数字・記号をそれぞれ1文字以上含む)
+  const passwordValidation = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+  if(!passwordValidation.test(password)){
+    return res.render('register', {errorMessage:'パスワードは大文字、小文字、数字、特殊文字を含む12文字以上でなければなりません。'});
+  }
+
+  db.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, password], function(err) {
+    if(err){
+      res.status(500).send('error registering user');
+    } else {
+      res.redirect('/login');
+    }
+  });
+});
+
 //商品一覧画面への移動
 app.get('/productList', (req, res) => {
   db.all('SELECT * FROM products', (err, rows) =>{
@@ -73,9 +118,25 @@ app.get('/cart', (req, res) => {
     }
     var totalPrice = rows.reduce((total, item) => total + (item.price * item.quantity), 0);
     res.render('cart', { cartItems:rows, totalPrice});
-  })
+  });
+});
 
-})
+//商品管理画面への移動
+app.get('/productAdmin', (req, res) => {
+  res.render('productAdmin');
+});
+
+//商品追加機能
+app.post('/productAdmin/add', (req, res) => {
+  const { name, price, description, image_url } = req.body;
+  db.run('INSERT INTO products(name, price, description, image_url) VALUES (?, ?, ?, ?)', [name, price, description, image_url], function(err) {     if(err){
+      console.error(err.message); // ターミナルに詳細ログを出すように追加
+      res.status(500).send('DB insert error');
+    } else {
+      res.redirect('/productAdmin');
+    }
+  });
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

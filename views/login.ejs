@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+</head>
+<body>
+    <h1>ログイン</h1>
+    <% if (errorMessage) { %>
+        <p style="color: red;"><%= errorMessage %></p>
+    <% } %>
+    <form action="/login" method="POST">
+        <label for="username">ユーザーID：</label>
+        <input type="text" name="username" required>
+        <br>
+        <label for="password">パスワード：</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">ログイン</button>
+    </form>
+    <a href="/register" class="button">アカウントをお持ちでない方はこちら</a> 
+</body>
+</html>
