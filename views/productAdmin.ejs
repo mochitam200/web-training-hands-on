@@ -27,6 +27,31 @@
         <button type="submit">追加</button>
     </form>
     
-    <h2></h2>
+    <h2>登録済み商品</h2>
+    <div id="product-container">
+        <% products.forEach(product => { %>
+            <div class="product">
+                <img src="<%= product.image_url %>" alt="<%= product.name %>" width="100">
+                <form action="/productAdmin/update/<%= product.id %>" method="POST">
+                    <label for="name">商品名：</label>
+                    <input type="text" name="name" value="<%= product.name %>"required>
+                    <br>
+                    <label for="price">価格：</label>
+                    <input type="number" name="price" value="<%= product.price %>" required>
+                    <br>
+                    <label for="description">説明：</label>
+                    <textarea name="description"><%= product.description %></textarea>
+                    <br>
+                    <label for="image_url">画像URL：</label>
+                    <input type="text" name="image_url" value="<%= product.image_url %>">
+                    <br>
+                    <button type="submit">変更</button>
+                </form>
+                <form action="/productAdmin/delete/<%= product.id %>" method="POST">
+                    <button type="submit">削除</button>
+                </form>
+            </div>
+        <% }); %>
+    </div>
 </body>
 </html>

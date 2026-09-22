@@ -123,7 +123,13 @@ app.get('/cart', (req, res) => {
 
 //商品管理画面への移動
 app.get('/productAdmin', (req, res) => {
-  res.render('productAdmin');
+  db.all('SELECT * FROM products', (err, rows) =>{
+      if(err){
+        res.status(500).send('DB select error');
+        return;
+      }
+    res.render('productAdmin', { products: rows});
+  });
 });
 
 //商品追加機能
@@ -137,6 +143,32 @@ app.post('/productAdmin/add', (req, res) => {
     }
   });
 });
+
+//商品情報変更機能
+app.post('/productAdmin/update/:id', (req, res) => {
+  const productID = req.params.id;
+  const { name, price, description, image_url } = req.body;
+  db.run('UPDATE products SET name =?, price = ?, description = ?, image_url = ? WHERE id = ?', [name, price, description, image_url, productID], function(err) {
+    if(err){
+        res.status(500).send('DB update error');        
+      } else {
+        res.redirect('/productAdmin');
+      }
+  });
+});
+
+//商品削除機能
+app.post('/productAdmin/delete/:id', (req, res) => {
+  const productId = req.params.id;
+  db.run('DELETE FROM products WHERE id =?', productId, function(err) {
+     if(err){
+        res.status(500).send('DB delete error');        
+      } else {
+        res.redirect('/productAdmin');
+      }
+  });
+});
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
