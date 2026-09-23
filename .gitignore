@@ -21,7 +21,6 @@
 # ビルドディレクトリ
 build/
 Build/
-bin/
 obj/
 
 # CMake生成ファイル
