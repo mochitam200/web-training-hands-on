@@ -27,7 +27,9 @@
     <hr>
 
     <h2>合計金額：￥<%= totalPrice %></h2>
-    <button>購入手続きへ進む</button>
+    <form action="/checkout" method="POST">
+        <button type="submit" class="button">購入</button>
+    </form>
     <a href="/productList" class="button">商品一覧に戻る</a>
 </body>
 </html>

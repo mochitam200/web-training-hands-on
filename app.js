@@ -248,6 +248,27 @@ app.post('/productAdmin/delete/:id', (req, res) => {
   });
 });
 
+//購入機能
+app.post('/checkout', (req, res) => {
+  const userId = req.session.userId; //ユーザーid作成
+  db.all('SELECT c.id, p.name, p.price, c.quantity FROM cart c JOIN products p ON c.product_id = p.id WHERE  c.user_id = ?', userId, (err, rows) => {
+    if(err){
+      console.error(err.message); // ターミナルに詳細ログを出すように追加
+      res.status(500).send('DB select error');
+      return;
+    }
+    var totalPrice = rows.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+    db.all('DELETE FROM cart WHERE user_id = ?', userId, function(err) {
+      if (err) {
+        res.status(500).send('DB delete error');
+      } else {
+        res.render('checkout', { message:'購入ありがとうございました。', cartItems:rows, totalPrice});
+      }
+    });
+  });
+});
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
