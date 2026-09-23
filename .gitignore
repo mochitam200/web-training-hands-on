@@ -12,6 +12,7 @@
 *.dylib
 *.dll
 
+
 # デバッグ情報
 *.pdb
 *.ilk
@@ -39,3 +40,4 @@ x64/
 *.vcxproj.user
 .vs/
 node_modules/
+database.db
