@@ -5,6 +5,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 //sqlite3モジュールの読み込み
 const sqlite3 = require('sqlite3')
+//express-sessionの読み込み
+const session = require('express-session');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -27,6 +29,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
+//セッションの設定
+app.use(session({ secret: 'secret'}));
+
 //ログイン画面への移動
 app.get('/login', (req, res) => {
   res.render('login', { errorMessage:''});
@@ -39,11 +44,14 @@ app.post('/login', (req, res) => {
      if(err){
       res.status(500).send('DB select error');
       return;
-    }    
+    } 
+    
     if(!row || row.password !== password){
       res.render('login.ejs', { errorMessage: 'ユーザーIDかパスワードが正しくありません'});
       return;
     }
+    req.session.username = username; //ユーザー名保存
+    req.session.userId = row.id; // id保存
     res.redirect('/productList');
   });
 });
@@ -66,6 +74,8 @@ app.post('/admin', (req, res) => {
       res.render('admin', { errorMessage: 'ユーザーIDかパスワードが正しくありません'});
       return;
     }
+    req.session.username = username; //ユーザー名保存
+    req.session.userId = row.id; // id保存
     res.redirect('/productAdmin');
   });
 });
@@ -77,8 +87,7 @@ app.get('/register', (req, res) => {
 
 //ユーザー登録機能
 app.post('/register', (req, res) => {
-  const { username, password } = req.body;
-  //パスワードが条件を満たしているかチェックする正規表現(12文字以上で、英小文字・英大文字・数字・記号をそれぞれ1文字以上含む)
+  const { username, password } = req.body;  //↓パスワードが条件を満たしているかチェックする正規表現(12文字以上で、英小文字・英大文字・数字・記号をそれぞれ1文字以上含む)
   const passwordValidation = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
   if(!passwordValidation.test(password)){
     return res.render('register', {errorMessage:'パスワードは大文字、小文字、数字、特殊文字を含む12文字以上でなければなりません。'});
@@ -117,21 +126,44 @@ app.get('/product/:id', (req, res) => {
 });
 
 //商品をカートに追加
-app.post('/add-to-cart', express.urlencoded({extended: true }),(req,res) => {
-  const { product_id, quantity} = req.body;
-  db.run('INSERT INTO cart (product_id, quantity) VALUES (?, ?)', [product_id, quantity], function(err) {
-    if(err){
-      console.error(err.message); // ターミナルに詳細ログを出すように追加
-      res.status(500).send('DB insert error');      
-    } else{
-      res.redirect('/cart'); // 追加後はカート画面に遷移させるのが一般的
+app.post('/add-to-cart', express.urlencoded({ extended: true }), (req, res) => {
+  const { product_id, quantity } = req.body;
+  const userId =req.session.userId; //ユーザーidを受け取る処理
+
+  db.get('SELECT * FROM cart WHERE product_id = ? AND user_id = ?', [product_id, userId], (err, row) => {
+    if (err) {
+      console.error(err.message);
+      res.status(500).send('cart select error');
+      return;
+    }
+
+    if (row) {  // カートに既に同じ商品がある場合は個数を更新（UPDATE）
+      const newQuantity = row.quantity + parseInt(quantity);
+      db.run('UPDATE cart SET quantity = ? WHERE product_id = ? AND user_id = ?', [newQuantity, product_id, userId], function(err) {
+        if (err) {
+          console.error(err.message);
+          res.status(500).send('cart update error');
+        } else {
+          res.redirect('/cart');
+        }
+      });
+    } else {// カートに商品が無い場合は新しく追加（INSERT）
+      db.run('INSERT INTO cart (product_id, quantity, user_id) VALUES (?, ?, ?)', [product_id, quantity, userId], function(err) {
+        if (err) {
+          console.error(err.message);
+          res.status(500).send('DB insert error');
+        } else {
+          res.redirect('/cart');
+        }
+      });
     }
   });
 });
 
 //カート画面への移動
 app.get('/cart', (req, res) => {
-  db.all('SELECT c.id, p.name, p.price, c.quantity FROM cart c JOIN products p ON c.product_id = p.id', (err, rows) => {
+  const userId = req.session.userId; //ユーザーid作成
+  db.all('SELECT c.id, p.name, p.price, c.quantity FROM cart c JOIN products p ON c.product_id = p.id WHERE  c.user_id = ?', userId, (err, rows) => {
     if(err){
       console.error(err.message); // ターミナルに詳細ログを出すように追加
       res.status(500).send('DB select error');
@@ -139,6 +171,32 @@ app.get('/cart', (req, res) => {
     }
     var totalPrice = rows.reduce((total, item) => total + (item.price * item.quantity), 0);
     res.render('cart', { cartItems:rows, totalPrice});
+  });
+});
+
+//カートの数量を更新
+app.post('/update-cart/:id', (req, res) => {
+  const id = req.params.id;
+  const { quantity } = req.body;
+
+  db.run('UPDATE cart SET quantity = ? WHERE id = ?', [quantity, id], function(err) {
+    if (err) { //エラーが起きた時
+      res.status(500).send('cart update error');
+    } else{ //エラーが起きなかった時
+      res.redirect('/cart');
+    }
+  });
+});
+
+//カートから商品を削除
+app.post('/remove-from-cart/:id', (req, res) => {
+  const id = req.params.id;
+  db.run('DELETE FROM cart WHERE id = ?', id, function(err) {
+    if (err) {
+      res.status(500).send('cart delete error');
+    } else{ //エラーが起きなかった時
+      res.redirect('/cart');
+    }
   });
 });
 

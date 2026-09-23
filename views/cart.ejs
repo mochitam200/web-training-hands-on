@@ -14,6 +14,13 @@
         <h2><%= item.name %></h2>
         <p>価格：￥<%= item.price %></p>
         <p>数量：<%= item.quantity %></p>
+        <form action="/update-cart/<%= item.id %>" method="POST">
+            <input type="number" name="quantity" value="<%= item.quantity %>" min="1" required>
+            <button type="submit">更新</button>
+        </form>
+        <form action="/remove-from-cart/<%= item.id %>" method="POST">
+            <button type="submit">削除</button>
+        </form>
         <% }); %>
     </div>
      
