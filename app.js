@@ -8,7 +8,6 @@ const sqlite3 = require('sqlite3')
 //express-sessionの読み込み
 const session = require('express-session');
 
-var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
@@ -26,7 +25,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+// '/' (トップページ) にアクセスしたら '/login' にリダイレクト
+app.get('/', (req, res) => {
+  res.redirect('/login');
+});
 app.use('/users', usersRouter);
 
 //セッションの設定
